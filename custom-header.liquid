@@ -1,0 +1,239 @@
+{% comment %}
+  Custom Header Section – Voucler
+{% endcomment %}
+
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Announcement */
+.announcement-bar {
+  background: linear-gradient(90deg, #f5e6d3 0%, #fdf3e7 100%);
+  padding: 12px 40px;
+  text-align: center;
+  font-size: 14px;
+  color: #333;
+  position: relative;
+}
+
+.announcement-bar button {
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+/* Header */
+.header {
+  background: #fff;
+  border-bottom: 1px solid #e5e5e5;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Navigation */
+.nav-menu {
+  display: flex;
+  list-style: none;
+  gap: 40px;
+}
+
+.nav-menu a {
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+  color: #333;
+}
+
+/* Logo */
+.logo img {
+  display: block;
+  height: auto;
+  max-width: 100%;
+}
+
+/* Actions */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  font-size: 20px;
+}
+
+.cart-count {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #000;
+  color: #fff;
+  width: 18px;
+  height: 18px;
+  font-size: 11px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Mobile */
+.mobile-menu-btn {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+@media (max-width: 968px) {
+  .nav-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #fff;
+    flex-direction: column;
+    padding: 20px;
+    gap: 20px;
+    border-bottom: 1px solid #e5e5e5;
+  }
+
+  .mobile-menu-btn {
+    display: block;
+  }
+}
+</style>
+
+{% if section.settings.show_announcement %}
+<div class="announcement-bar" id="announcement">
+  {{ section.settings.announcement_text }}
+  <button onclick="this.parentElement.style.display='none'">✕</button>
+</div>
+{% endif %}
+
+<header class="header">
+  <div class="header-container">
+
+    <!-- Mobile Menu Button -->
+    <button class="mobile-menu-btn" aria-label="Menu">☰</button>
+
+    <!-- Navigation -->
+    <nav>
+      <ul class="nav-menu" id="mobileMenu">
+        {% for link in linklists[section.settings.main_menu].links %}
+          <li>
+            <a href="{{ link.url }}">{{ link.title }}</a>
+          </li>
+        {% endfor %}
+      </ul>
+    </nav>
+
+    <!-- Logo -->
+    <a href="{{ routes.root_url }}" class="logo">
+      {% if section.settings.logo != blank %}
+        <img
+          src="{{ section.settings.logo | image_url: width: section.settings.logo_width }}"
+          width="{{ section.settings.logo_width }}"
+          height="{{ section.settings.logo_width | divided_by: section.settings.logo.aspect_ratio }}"
+          alt="{{ shop.name }}"
+          loading="lazy"
+        >
+      {% else %}
+        {{ shop.name }}
+      {% endif %}
+    </a>
+
+    <!-- Actions -->
+    <div class="header-actions">
+
+      <!-- Search -->
+      <form action="{{ routes.search_url }}" method="get">
+        <input type="search" name="q" placeholder="Search">
+      </form>
+
+      <!-- Account -->
+      <a href="{{ routes.account_url }}" class="icon-btn" aria-label="Account">👤</a>
+
+      <!-- Cart -->
+      <a href="{{ routes.cart_url }}" class="icon-btn" aria-label="Cart">
+        🛒
+        {% if cart.item_count > 0 %}
+          <span class="cart-count">{{ cart.item_count }}</span>
+        {% endif %}
+      </a>
+
+    </div>
+  </div>
+</header>
+
+<script>
+document.querySelector('.mobile-menu-btn').addEventListener('click', function () {
+  const menu = document.getElementById('mobileMenu');
+  menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+});
+</script>
+
+{% schema %}
+{
+  "name": "Custom Header",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_announcement",
+      "label": "Show announcement bar",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "announcement_text",
+      "label": "Announcement text",
+      "default": "Enjoy complimentary shipping for orders over $150"
+    },
+    {
+      "type": "image_picker",
+      "id": "logo",
+      "label": "Logo"
+    },
+    {
+      "type": "range",
+      "id": "logo_width",
+      "label": "Logo width (px)",
+      "min": 80,
+      "max": 280,
+      "step": 10,
+      "default": 160
+    },
+    {
+      "type": "link_list",
+      "id": "main_menu",
+      "label": "Main navigation menu"
+    }
+  ]
+}
+{% endschema %}
